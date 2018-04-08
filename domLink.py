@@ -46,23 +46,26 @@ def enum(domain):
 	if (content["status"] != 1):
 		print "[!] WHOIS lookup failed, your API key is probably invalid or credits have been exhausted"
 
-	if not (content["registrant_contact"]["company_name"] in company_names):
-		company_names.append(content["registrant_contact"]["company_name"])
+	try:
+		if not (content["registrant_contact"]["company_name"] in company_names):
+			company_names.append(content["registrant_contact"]["company_name"])
 
-	if not (content["registrant_contact"]["email_address"] in company_emails):
-		company_emails.append(content["registrant_contact"]["email_address"])
+		if not (content["registrant_contact"]["email_address"] in company_emails):
+			company_emails.append(content["registrant_contact"]["email_address"])
 
-	if not (content["administrative_contact"]["company_name"] in company_names):
-		company_names.append(content["administrative_contact"]["company_name"])
+		if not (content["administrative_contact"]["company_name"] in company_names):
+			company_names.append(content["administrative_contact"]["company_name"])
 
-	if not (content["administrative_contact"]["email_address"] in company_emails):
-		company_emails.append(content["administrative_contact"]["email_address"])
+		if not (content["administrative_contact"]["email_address"] in company_emails):
+			company_emails.append(content["administrative_contact"]["email_address"])
 
-	if not (content["technical_contact"]["company_name"] in company_names):
-		company_names.append(content["technical_contact"]["company_name"])
+		if not (content["technical_contact"]["company_name"] in company_names):
+			company_names.append(content["technical_contact"]["company_name"])
 
-	if not (content["technical_contact"]["email_address"] in company_emails):
-		company_emails.append(content["technical_contact"]["email_address"])
+		if not (content["technical_contact"]["email_address"] in company_emails):
+			company_emails.append(content["technical_contact"]["email_address"])
+	except:
+		bChanged = True
 
 	print ""
 	print "-------------------"
