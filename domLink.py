@@ -132,12 +132,12 @@ def query_yes_no(question, default='yes'):
 
 def banner():
     print '''
-        DomLink Domain Discovery Tool
-        Author: Vincent Yiu (@vysecurity)
-        Contributors: John Bond (@b4ldr)
-        https://www.github.com/vysec/DomLink
-        Version: {}
-        '''.format(__version__)
+DomLink Domain Discovery Tool
+Author: Vincent Yiu (@vysecurity)
+Contributors: John Bond (@b4ldr)
+https://www.github.com/vysec/DomLink
+Version: {}
+'''.format(__version__)
 
 
 def main():
