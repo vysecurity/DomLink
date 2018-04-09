@@ -14,7 +14,7 @@ config = ConfigParser.RawConfigParser()
 config.read('domLink.cfg')
 api_key = config.get('API_KEYS', 'whoxy')
 
-VERSION = "0.1"
+VERSION = "0.1.1"
 
 company_names = []
 company_emails = []
