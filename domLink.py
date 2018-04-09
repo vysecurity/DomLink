@@ -7,7 +7,7 @@ from sys import exit
 import logging
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 
 def set_log_level(args_level):
@@ -130,8 +130,19 @@ def query_yes_no(question, default='yes'):
         else:
             print('Please respond with \'yes\' or \'no\'(or \'y\' or \'n\').\n')
 
+def banner():
+    print '''
+        DomLink Domain Discovery Tool
+        Author: Vincent Yiu (@vysecurity)
+        Contributors: John Bond (@b4ldr)
+        https://www.github.com/vysec/DomLink
+        Version: {}
+        '''.format(__version__)
+
 
 def main():
+    banner()
+
     args = get_args()
     set_log_level(args.verbose)
     api_key = args.api if args.api else read_key_from_config()
