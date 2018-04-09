@@ -25,6 +25,7 @@ def get_args():
     parser = ArgumentParser(description='''
         DomLink Domain Discovery Tool
         Author: Vincent Yiu (@vysecurity)
+        Contributors: John Bond (@b4ldr)
         https://www.github.com/vysec/DomLink
         Version: {}'''.format(__version__))
     parser.add_argument('domain', help='Domain to perform DomLink Discovery on')
