@@ -160,7 +160,7 @@ def main():
         else:
             results['domains'] = dict.fromkeys(results['domains'], False)
         if args.companies:
-            for company, check in results['comainies'].items():
+            for company, check in results['companies'].items():
                 if not check:
                     continue
                 check = query_yes_no('Do you want to check "{}"'.format(company))
