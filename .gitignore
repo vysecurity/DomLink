@@ -1,1 +1,3 @@
 domLink.cfg
+*.pyc
+*.sw?
