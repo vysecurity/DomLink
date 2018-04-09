@@ -151,7 +151,7 @@ def expand():
 						if not (result["domain_name"] in company_domains):
 							company_domains.append(result["domain_name"])
 						if not(result["company_name"].lower() in company_names):
-							print "[*] Added company name: '%s'" % results["company_name"]
+							print "[*] Added company name: '%s'" % result["company_name"]
 							
 						if not(result["email_address"].lower() in company_emails):
 							company_emails.append(result["email_address"])
