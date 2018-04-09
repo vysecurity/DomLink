@@ -137,6 +137,7 @@ Version: {}
 
 
 def main():
+	banner()
     args = get_args()
     set_log_level(args.verbose)
     api_key = args.api if args.api else read_key_from_config()
