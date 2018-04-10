@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
-from ConfigParser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
 from sys import exit
 import logging
+
+try:                 # Python 2
+    from configParser import RawConfigParser
+except ImportError:  # Python 3
+    from ConfigParser import RawConfigParser
 
 __version__ = '0.1.1'
 
@@ -32,11 +36,11 @@ def get_args():
     parser.add_argument('-A', '--api', help='https://www.whoxy.com API key')
     parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument('-C', '--companies', action='store_true',
-            help='recersivly search companies')
+                        help='recersivly search companies')
     parser.add_argument('-E', '--emails', action='store_true',
-            help='recersivly search emails')
+                        help='recersivly search emails')
     parser.add_argument('-D', '--domains', action='store_true',
-            help='recersivly search domains')
+                        help='recersivly search domains')
     return parser.parse_args()
 
 
