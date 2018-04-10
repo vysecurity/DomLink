@@ -6,8 +6,12 @@ from requests import get
 from sys import exit
 import logging
 
-
 __version__ = '0.1.1'
+
+try:
+    raw_input          # Python 2
+except NameError:
+    raw_input = input  # Python 3
 
 
 def set_log_level(args_level):
@@ -123,7 +127,7 @@ def query_yes_no(question, default='yes'):
         elif choice in valid:
             return valid[choice]
         else:
-            print('Please respond with \'yes\' or \'no\'(or \'y\' or \'n\').\n')
+            print("Please respond with 'yes' or 'no'(or 'y' or 'n').\n")
 
 
 def banner():
@@ -199,13 +203,13 @@ def main():
 ### Email Addresses:
 {}'''.format(
             '\n'.join(
-                [k for k in results['companies'].keys() if k not in blacklist['companies']]),
+                [k for k in results['companies'] if k not in blacklist['companies']]),
             '\n'.join(
-                [k for k in results['domains'].keys() if k not in blacklist['domains']]),
+                [k for k in results['domains'] if k not in blacklist['domains']]),
             '\n'.join(
-                [k for k in results['emails'].keys() if k not in blacklist['emails']]))
-    print banner()
-    print output
+                [k for k in results['emails'] if k not in blacklist['emails']]))
+    print(banner())
+    print(output)
     if args.output:
         with open(args.output, 'w') as text_file:
             text_file.write(output)
