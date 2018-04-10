@@ -111,13 +111,8 @@ def query_yes_no(question, default='yes'):
     '''Ask a yes or no question'''
     valid = {'yes': True, 'y': True, 'ye': True,
             'no': False, 'n': False}
-    if default is None:
-        prompt = ' [y/n] '
-    elif default == 'yes':
-        prompt = ' [Y/n] '
-    elif default == 'no':
-        prompt = ' [y/N] '
-    else:
+    prompt = {None: ' [y/n] ', 'yes':' [Y/n] ', 'no': ' [y/N] '}.get(default)
+    if not prompt:
         raise ValueError('invalid default answer: {}'.format(default))
 
     while True:
@@ -141,7 +136,7 @@ Version: {}
 
 
 def main():
-	banner()
+    banner()
     args = get_args()
     set_log_level(args.verbose)
     api_key = args.api if args.api else read_key_from_config()
