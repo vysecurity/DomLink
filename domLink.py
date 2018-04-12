@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 
-from ConfigParser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
 from sys import exit
 import logging
 
+try:                 # Python 2
+    from configParser import RawConfigParser
+except ImportError:  # Python 3
+    from ConfigParser import RawConfigParser
 
 __version__ = '0.1.1'
+
+try:
+    raw_input          # Python 2
+except NameError:
+    raw_input = input  # Python 3
 
 
 def set_log_level(args_level):
@@ -28,11 +36,11 @@ def get_args():
     parser.add_argument('-A', '--api', help='https://www.whoxy.com API key')
     parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument('-C', '--companies', action='store_true',
-            help='recersivly search companies')
+                        help='recersivly search companies')
     parser.add_argument('-E', '--emails', action='store_true',
-            help='recersivly search emails')
+                        help='recersivly search emails')
     parser.add_argument('-D', '--domains', action='store_true',
-            help='recersivly search domains')
+                        help='recersivly search domains')
     return parser.parse_args()
 
 
@@ -107,13 +115,8 @@ def query_yes_no(question, default='yes'):
     '''Ask a yes or no question'''
     valid = {'yes': True, 'y': True, 'ye': True,
             'no': False, 'n': False}
-    if default is None:
-        prompt = ' [y/n] '
-    elif default == 'yes':
-        prompt = ' [Y/n] '
-    elif default == 'no':
-        prompt = ' [y/N] '
-    else:
+    prompt = {None: ' [y/n] ', 'yes':' [Y/n] ', 'no': ' [y/N] '}.get(default)
+    if not prompt:
         raise ValueError('invalid default answer: {}'.format(default))
 
     while True:
@@ -123,7 +126,7 @@ def query_yes_no(question, default='yes'):
         elif choice in valid:
             return valid[choice]
         else:
-            print('Please respond with \'yes\' or \'no\'(or \'y\' or \'n\').\n')
+            print("Please respond with 'yes' or 'no'(or 'y' or 'n').\n")
 
 
 def banner():
@@ -137,7 +140,7 @@ Version: {}
 
 
 def main():
-	banner()
+    banner()
     args = get_args()
     set_log_level(args.verbose)
     api_key = args.api if args.api else read_key_from_config()
@@ -199,13 +202,13 @@ def main():
 ### Email Addresses:
 {}'''.format(
             '\n'.join(
-                [k for k in results['companies'].keys() if k not in blacklist['companies']]),
+                [k for k in results['companies'] if k not in blacklist['companies']]),
             '\n'.join(
-                [k for k in results['domains'].keys() if k not in blacklist['domains']]),
+                [k for k in results['domains'] if k not in blacklist['domains']]),
             '\n'.join(
-                [k for k in results['emails'].keys() if k not in blacklist['emails']]))
-    print banner()
-    print output
+                [k for k in results['emails'] if k not in blacklist['emails']]))
+    print(banner())
+    print(output)
     if args.output:
         with open(args.output, 'w') as text_file:
             text_file.write(output)
