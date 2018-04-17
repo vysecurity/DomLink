@@ -22,7 +22,7 @@ def set_log_level(args_level):
 
 
 def get_args():
-    parser = ArgumentParser(description=banner())
+    parser = ArgumentParser()
     parser.add_argument('domain', help='Domain to perform DomLink Discovery on')
     parser.add_argument('-o', '--output', help='Output file')
     parser.add_argument('-A', '--api', help='https://www.whoxy.com API key')
@@ -127,17 +127,16 @@ def query_yes_no(question, default='yes'):
 
 
 def banner():
-    return '''
-DomLink Domain Discovery Tool
-Author: Vincent Yiu (@vysecurity)
-Contributors: John Bond (@b4ldr)
-https://www.github.com/vysec/DomLink
-Version: {}
-'''.format(__version__)
-
+	print "DomLink Domain Discovery Tool"
+	print "Author: Vincent Yiu (@vysecurity)"
+	print "Contributors: John Bond (@b4ldr)"
+	print "https://www.github.com/vysec/DomLink"
+	print "Version: {}".format(__version__)
+	print ""
 
 def main():
     banner()
+
     args = get_args()
     set_log_level(args.verbose)
     api_key = args.api if args.api else read_key_from_config()
@@ -204,7 +203,6 @@ def main():
                 [k for k in results['domains'].keys() if k not in blacklist['domains']]),
             '\n'.join(
                 [k for k in results['emails'].keys() if k not in blacklist['emails']]))
-    print banner()
     print output
     if args.output:
         with open(args.output, 'w') as text_file:
