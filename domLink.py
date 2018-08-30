@@ -4,6 +4,7 @@ from ConfigParser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
 from sys import exit
+import urllib
 import logging
 
 
@@ -170,7 +171,7 @@ def main():
                     continue
                 check = query_yes_no('Do you want to check "{}"'.format(company))
                 if check:
-                    results = merge(results, recursive_search(base_url, 'company', company))
+                    results = merge(results, recursive_search(base_url, 'company', urllib.quote_plus(company)))
                     check = False
                 else:
                     blacklist['companies'].add(company)
