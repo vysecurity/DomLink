@@ -55,7 +55,8 @@ def parse_whois(base_url, domain):
     for record in ['registrant', 'administrative', 'technical']:
         record = '{}_contact'.format(record)
         email = content.get(record, {}).get('email_address', '').lower()
-        company = content.get(record, {}).get('company_name', '')
+	if ( not content.get(record, {}).get('company_name', '') == 'REDACTED FOR PRIVACY'):
+            company = content.get(record, {}).get('company_name', '')
         if email:
             logging.debug('domain: adding email {}'.format(email))
             emails[email] = True
