@@ -2,7 +2,7 @@
 
 ## Blog Post
 
-https://vincentyiu.co.uk/domlink-automating-domain-discovery/
+https://vincentyiu.co.uk/red-team/reconaissance/domlink-automating-domain-discovery
 
 ## Author
 
