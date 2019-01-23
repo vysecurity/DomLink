@@ -3,7 +3,8 @@
 from ConfigParser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
-from sys import exit
+import sys
+import os.path
 import urllib
 import logging
 
@@ -39,7 +40,7 @@ def get_args():
 
 def read_key_from_config():
     config = RawConfigParser()
-    config.read('domLink.cfg')
+    config.read(os.path.join(os.path.dirname(sys.argv[0]), 'domLink.cfg'))
     return config.get('API_KEYS', 'whoxy')
 
 
