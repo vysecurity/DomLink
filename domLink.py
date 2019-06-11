@@ -9,7 +9,7 @@ import urllib
 import logging
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 def set_log_level(args_level):
@@ -57,8 +57,10 @@ def parse_whois(base_url, domain):
     for record in ['registrant', 'administrative', 'technical']:
         record = '{}_contact'.format(record)
         email = content.get(record, {}).get('email_address', '').lower()
-	if ( not content.get(record, {}).get('company_name', '') == 'REDACTED FOR PRIVACY'):
+        if ( not content.get(record, {}).get('company_name', '') == 'REDACTED FOR PRIVACY'):
             company = content.get(record, {}).get('company_name', '')
+        else:
+            company = ''
         if email:
             logging.debug('domain: adding email {}'.format(email))
             emails[email] = True
