@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
 import sys
@@ -13,6 +13,9 @@ __version__ = '0.1.2'
 
 
 def set_log_level(args_level):
+    print(type(int))
+    if args_level is None:
+        args_level = 0
     log_level = logging.ERROR
     if args_level == 1:
         log_level = logging.WARN
@@ -132,12 +135,12 @@ def query_yes_no(question, default='yes'):
 
 
 def banner():
-	print "DomLink Domain Discovery Tool"
-	print "Author: Vincent Yiu (@vysecurity)"
-	print "Contributors: John Bond (@b4ldr)"
-	print "https://www.github.com/vysec/DomLink"
-	print "Version: {}".format(__version__)
-	print ""
+	print ("DomLink Domain Discovery Tool")
+	print ("Author: Vincent Yiu (@vysecurity)")
+	print ("Contributors: John Bond (@b4ldr)")
+	print ("https://www.github.com/vysec/DomLink")
+	print ("Version: {}".format(__version__))
+	print ("")
 
 def main():
     banner()
@@ -208,7 +211,7 @@ def main():
                 [k for k in results['domains'].keys() if k not in blacklist['domains']]),
             '\n'.join(
                 [k for k in results['emails'].keys() if k not in blacklist['emails']]))
-    print output
+    print(output)
     if args.output:
         with open(args.output, 'w') as text_file:
             text_file.write(output)
@@ -216,3 +219,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
