@@ -30,11 +30,11 @@ def get_args():
     parser.add_argument('-A', '--api', help='https://www.whoxy.com API key')
     parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument('-C', '--companies', action='store_true',
-            help='recersivly search companies')
+            help='recursively search companies')
     parser.add_argument('-E', '--emails', action='store_true',
-            help='recersivly search emails')
+            help='recursively search emails')
     parser.add_argument('-D', '--domains', action='store_true',
-            help='recersivly search domains')
+            help='recursively search domains')
     return parser.parse_args()
 
 
