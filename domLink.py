@@ -1,19 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from configparser import RawConfigParser
 from argparse import ArgumentParser
 from requests import get
 import sys
 import os.path
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import logging
 
 
-__version__ = '0.1.2'
+__version__ = '0.2'
 
 
 def set_log_level(args_level):
-    print(type(int))
     if args_level is None:
         args_level = 0
     log_level = logging.ERROR
@@ -43,33 +42,80 @@ def get_args():
 
 def read_key_from_config():
     config = RawConfigParser()
-    config.read(os.path.join(os.path.dirname(sys.argv[0]), 'domLink.cfg'))
-    return config.get('API_KEYS', 'whoxy')
+    file = config.read(os.path.join(os.path.dirname(sys.argv[0]), 'domLink.cfg'))
+    if file:
+        return config.get('API_KEYS', 'whoxy')
+    else:
+        logging.error('Could not find \'domLink.cfg\' and no API key was defined.')
+        exit()
 
+def check_balance(base_url):
+    mode = {'lookup': True, 'history': True, 'reverse': True}
+    url = '{}&account=balance'.format(base_url)
+    content = get(url).json()
+
+    logging.info('Checking account balance')
+
+    if (content['status'] == 0):
+        logging.error('WHOIS lookup failed, {}'.format(content['status_reason']))
+        exit()
+    elif (content['status'] == 1):
+        if (content['live_whois_balance'] == 0 and content['whois_history_balance'] == 0 and content['reverse_whois_balance'] == 0):
+            logging.error('Zero API queries left. Please recharge.')
+            exit()
+        elif (content['live_whois_balance'] == 0):
+            logging.warning('WHOIS lookup credits have been exhausted. Lookup API queries will be skipped.')
+            mode['lookup'] = False
+        elif (content['whois_history_balance'] == 0):
+            logging.warning('WHOIS history credits have been exhausted. History API queries will be skipped.')
+            mode['history'] = False
+        elif (content['reverse_whois_balance'] == 0):
+            logging.warning('Reverse WHOIS credits have been exhausted. Reverse API queries will be skipped.')
+            mode['reverse'] = False
+    else:
+        logging.error('WHOIS lookup failed, {}'.format(content['status_reason']))
+        exit()
+    return mode
 
 def parse_whois(base_url, domain):
+    logging.info('Performing WHOIS lookup on {}'.format(domain))
+
     emails, companies, domains = {}, {}, {domain: False}
     url = '{}&whois={}'.format(base_url, domain)
     content = get(url).json()
 
-    logging.info('Performing WHOIS lookup on {}'.format(domain))
-
-    if (content['status'] != 1):
-        logging.error('WHOIS lookup failed, your API key is probably invalid or credits have been exhausted')
-        return {'emails': emails, 'companies': companies, 'domains': domains}
     for record in ['registrant', 'administrative', 'technical']:
         record = '{}_contact'.format(record)
         email = content.get(record, {}).get('email_address', '').lower()
-        if ( not content.get(record, {}).get('company_name', '') == 'REDACTED FOR PRIVACY'):
-            company = content.get(record, {}).get('company_name', '')
-        else:
-            company = ''
-        if email:
+        company = content.get(record, {}).get('company_name', '')
+        if email and (email != 'redacted for privacy') and ('*' not in email):
             logging.debug('domain: adding email {}'.format(email))
             emails[email] = True
-        if company:
+        if company and company != 'REDACTED FOR PRIVACY':
             logging.debug('domain: adding email {}'.format(email))
             companies[company] = True
+    return {'emails': emails, 'companies': companies, 'domains': domains}
+
+
+def parse_history(base_url, domain):
+    logging.info('Performing WHOIS history lookup on {}'.format(domain))
+
+    emails, companies, domains = {}, {}, {domain: False}
+    url = '{}&history={}'.format(base_url, domain)
+    content = get(url).json()
+
+    if (content['total_records_found'] >= 1):
+        for record in content['whois_records']:
+            for entry in ['registrant', 'administrative', 'technical']:
+                entry = '{}_contact'.format(entry)
+                email = record.get(entry, {}).get('email_address', '').lower()
+                company = record.get(entry, {}).get('company_name', '')
+                if email and (email != 'redacted for privacy') and ('*' not in email):
+                    logging.debug('domain: adding email {}'.format(email))
+                    emails[email] = True
+                if company and company != 'REDACTED FOR PRIVACY':
+                    logging.debug('domain: adding email {}'.format(email))
+                    companies[company] = True
     return {'emails': emails, 'companies': companies, 'domains': domains}
 
 
@@ -93,7 +139,7 @@ def recursive_search(base_url, search, find, page=1, pages=9999):
                 if company:
                     logging.debug('{}={} adding email {}'.format(search, find, company))
                     companies[company] = True
-                if email:
+                if email and (email != 'redacted for privacy') and ('*' not in email):
                     logging.debug('{}={} adding email {}'.format(search, find, email))
                     emails[email] = True
         page += 1
@@ -101,7 +147,7 @@ def recursive_search(base_url, search, find, page=1, pages=9999):
 
 
 def merge(source, destination):
-    for key, value in source.items():
+    for key, value in list(source.items()):
         if isinstance(value, dict):
             # get node or create one
             node = destination.setdefault(key, {})
@@ -125,7 +171,7 @@ def query_yes_no(question, default='yes'):
         raise ValueError('invalid default answer: {}'.format(default))
 
     while True:
-        choice = raw_input(question + prompt).lower()
+        choice = input(question + prompt).lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
@@ -135,37 +181,45 @@ def query_yes_no(question, default='yes'):
 
 
 def banner():
-	print ("DomLink Domain Discovery Tool")
-	print ("Author: Vincent Yiu (@vysecurity)")
-	print ("Contributors: John Bond (@b4ldr)")
-	print ("https://www.github.com/vysec/DomLink")
-	print ("Version: {}".format(__version__))
-	print ("")
+    print ("")
+    print ("DomLink Domain Discovery Tool")
+    print ("Author: Vincent Yiu (@vysecurity)")
+    print ("Contributors: Jan Rude (@whoot); John Bond (@b4ldr)")
+    print ("https://www.github.com/vysec/DomLink")
+    print ("Version: {}".format(__version__))
+    print ("")
 
 def main():
     banner()
-
+    
     args = get_args()
     set_log_level(args.verbose)
     api_key = args.api if args.api else read_key_from_config()
     blacklist = {'domains': set(), 'emails': set(), 'companies': set()}
-    base_url = 'http://api.whoxy.com/?key={}'.format(api_key)
+    base_url = 'https://api.whoxy.com/?key={}'.format(api_key)
 
     if '.' not in args.domain:
         logging.error('It\'s probably unlikely that the target is a whole TLD')
         exit()
 
-    results = parse_whois(base_url, args.domain)
-    while any(results['domains'].values() +
-            results['companies'].values() +
-            results['emails'].values()):
+    balance = check_balance(base_url)
+    if (balance['lookup']):
+        results = parse_whois(base_url, args.domain)
+    if (balance['history']):
+        results = merge(results, parse_history(base_url, args.domain))
+
+    while any(list(results['domains'].values()) + 
+        list(results['companies'].values()) + 
+        list(results['emails'].values())):
         if args.domains:
-            for domain, check in results['domains'].items():
+            for domain, check in list(results['domains'].items()):
                 if not check:
                     continue
                 check = query_yes_no('Do you want to check "{}"'.format(domain))
                 if check:
                     results = merge(results, parse_whois(base_url, domain))
+                    if (balance['history']):
+                        results = merge(results, parse_history(base_url, domain))
                     check = False
                 else:
                     blacklist['domains'].add(domain)
@@ -173,28 +227,34 @@ def main():
         else:
             results['domains'] = dict.fromkeys(results['domains'], False)
         if args.companies:
-            for company, check in results['companies'].items():
-                if not check:
-                    continue
-                check = query_yes_no('Do you want to check "{}"'.format(company))
-                if check:
-                    results = merge(results, recursive_search(base_url, 'company', urllib.quote_plus(company)))
-                    check = False
+            for company, check in list(results['companies'].items()):
+                if balance['reverse'] is True:
+                    if not check:
+                        continue
+                    check = query_yes_no('Do you want to check "{}"'.format(company))
+                    if check:
+                        results = merge(results, recursive_search(base_url, 'company', urllib.parse.quote_plus(company)))
+                        check = False
+                    else:
+                        blacklist['companies'].add(company)
                 else:
-                    blacklist['companies'].add(company)
+                    check = False
                 results['companies'][company] = check
         else:
             results['companies'] = dict.fromkeys(results['companies'], False)
         if args.emails:
-            for email, check in results['emails'].items():
-                if not check:
-                    continue
-                check = query_yes_no('Do you want to check "{}"'.format(email))
-                if check:
-                    results = merge(results, recursive_search(base_url, 'email', email))
-                    check = False
+            for email, check in list(results['emails'].items()):
+                if balance['reverse'] is True:
+                    if not check:
+                        continue
+                    check = query_yes_no('Do you want to check "{}"'.format(email))
+                    if check:
+                        results = merge(results, recursive_search(base_url, 'email', email))
+                        check = False
+                    else:
+                        blacklist['emails'].add(email)
                 else:
-                    blacklist['emails'].add(email)
+                    check = False
                 results['emails'][email] = check
         else:
             results['emails'] = dict.fromkeys(results['emails'], False)
@@ -206,11 +266,11 @@ def main():
 ### Email Addresses:
 {}'''.format(
             '\n'.join(
-                [k for k in results['companies'].keys() if k not in blacklist['companies']]),
+                [k for k in list(results['companies'].keys()) if k not in blacklist['companies']]),
             '\n'.join(
-                [k for k in results['domains'].keys() if k not in blacklist['domains']]),
+                [k for k in list(results['domains'].keys()) if k not in blacklist['domains']]),
             '\n'.join(
-                [k for k in results['emails'].keys() if k not in blacklist['emails']]))
+                [k for k in list(results['emails'].keys()) if k not in blacklist['emails']]))
     print(output)
     if args.output:
         with open(args.output, 'w') as text_file:

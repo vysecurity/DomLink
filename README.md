@@ -11,6 +11,7 @@ Vincent Yiu (@vysecurity)
 ### Contributors
 
 John Bond (@b4ldr)
+Jan Rude (@whoot)
 
 ## What is DomLink?
 
