@@ -29,7 +29,7 @@ This is useful for bug bounty and red team engagements where you need to discove
 2) Set that API key in a file named ```domLink.cfg``` in the same directory.
 
 ```
-python domlink.py -D target.com -o target.out.txt
+python domLink.py -D target.com -o target.out.txt
 ```
 
 ## Example
