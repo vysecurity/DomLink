@@ -128,7 +128,7 @@ def recursive_search(base_url, search, find, page=1, pages=9999):
         total_pages = content.get('total_pages', 1)
         if total_pages < pages:
             pages = total_pages
-        if content.get('status', 0) == 1:
+        if content.get('status', 0) == 1 and content.get('total_results', 0) > 0:
             for result in content['search_result']:
                 domain = result.get('domain_name', '')
                 company = result.get('company_name', '')
